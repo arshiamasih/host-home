@@ -9,6 +9,7 @@ import { useHostDashboardData } from '../../data/host-context'
 import styled from 'styled-components'
 import { Box, Button, LinearProgress } from '@material-ui/core'
 import MessageModal from '../MUIModal/MessageModal/MessageModal'
+import { useParams } from 'react-router-dom'
 import ConfirmationModal from '../MUIModal/ConfirmationModal/ConfirmationModal'
 
 interface QuestionPageProps {
@@ -64,7 +65,12 @@ const IconContainer = (props: {
 
 export const QuestionPage = (props: QuestionPageProps) => {
     // sort by order
-    const { data } = useHostDashboardData()
+    const { data, getQuestionByOrderId } = useHostDashboardData()
+    const { id } = useParams()
+
+    React.useEffect(() => {
+        getQuestionByOrderId(id)
+    }, [id])
 
     React.useEffect(() => {
         let questions = data.showstopperQuestions.concat(data.matchingQuestions)
