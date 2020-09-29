@@ -118,49 +118,40 @@ export function HostDashboardDataProvider(
         initialState
     )
 
+    const loadData = async () => {
+        console.log('loadData: fetching...')
+        try {
+            dispatch({
+                type: HostDashboardActionType.BeginFetchQuestions,
+                payload: 'Retrieving host questions...',
+            })
+
+            const hostQuestions = await Promise.all([
+                apiClient.getHostShowstopperQuestions(),
+                apiClient.getHostMatchingQuestions(),
+            ])
+
+            //set on state
+            const qualifyingQuestionsMap = new Map<string, QualifyingQuestion>()
+            hostQuestions[0].map((question: QualifyingQuestion) => {
+                return qualifyingQuestionsMap.set(question.id, question)
+            })
+
+            dispatch({
+                type: HostDashboardActionType.FinishFetchQuestions,
+                payload: hostQuestions,
+                payload2: qualifyingQuestionsMap,
+            })
+        } catch (e) {
+            dispatch({
+                type: HostDashboardActionType.Error,
+                payload: `System error: ${e}`,
+            })
+        }
+    }
+
     React.useEffect(() => {
-        ;(async function () {
-            console.log('loadData: fetching...')
-            try {
-                dispatch({
-                    type: HostDashboardActionType.BeginFetchQuestions,
-                    payload: 'Retrieving host questions...',
-                })
-
-                const hostQuestions = await Promise.all([
-                    apiClient.getHostShowstopperQuestions(),
-                    apiClient.getHostMatchingQuestions(),
-                ])
-
-                //set on state
-                const qualifyingQuestionsMap = new Map<
-                    string,
-                    QualifyingQuestion
-                >()
-                hostQuestions[0].map((question: QualifyingQuestion) => {
-                    return qualifyingQuestionsMap.set(question.id, question)
-                })
-
-                // const matchingQuestionsMap = new Map<
-                //     string,
-                //     ShowstopperQuestionType
-                // >()
-                // hostQuestions[1].map((question: ShowstopperQuestionType) => {
-                //     return matchingQuestionsMap.set(question.id, question)
-                // })
-
-                dispatch({
-                    type: HostDashboardActionType.FinishFetchQuestions,
-                    payload: hostQuestions,
-                    payload2: qualifyingQuestionsMap,
-                })
-            } catch (e) {
-                dispatch({
-                    type: HostDashboardActionType.Error,
-                    payload: `System error: ${e}`,
-                })
-            }
-        })()
+        loadData()
     }, [])
 
     const value = React.useMemo(() => [state, dispatch], [state])
