@@ -8,11 +8,13 @@ import {
 } from '../models/v2'
 import { HostResponse } from '../models/HostResponse'
 import { ApiWrapper } from './ApiWrapper'
+import { number } from 'yup'
 
 const HostDashboardContext = React.createContext({})
 const apiClient = new ApiWrapper()
 
 interface HostDashboardData {
+    questionMapByOrder: Map<number, Question>
     showstopperQuestions: Array<QualifyingQuestion>
     matchingQuestions: Array<MatchingQuestion>
     hostResponse: HostResponse | null
@@ -42,9 +44,11 @@ interface HostDashboardAction {
         | string
         | HostResponse
         | any // how to resolve this any type on get questions payload?
+    payload2?: any
 }
 
 const initialState: HostDashboardData = {
+    questionMapByOrder: new Map<number, Question>(),
     showstopperQuestions: [],
     matchingQuestions: [],
     hostResponse: null,
@@ -79,6 +83,7 @@ function hostDashboardReducer(
                     QualifyingQuestion
                 >,
                 matchingQuestions: action.payload[1] as Array<MatchingQuestion>,
+                questionMapByOrder: action.payload2 as Map<number, Question>,
             }
         }
         case HostDashboardActionType.BeginPostResponse: {
@@ -128,13 +133,13 @@ export function HostDashboardDataProvider(
                 ])
 
                 //set on state
-                // const showstopperQuestionsMap = new Map<
-                //     string,
-                //     MatchingQuestionType
-                // >()
-                // hostQuestions[0].map((question: MatchingQuestionType) => {
-                //     return showstopperQuestionsMap.set(question.id, question)
-                // })
+                const qualifyingQuestionsMap = new Map<
+                    string,
+                    QualifyingQuestion
+                >()
+                hostQuestions[0].map((question: QualifyingQuestion) => {
+                    return qualifyingQuestionsMap.set(question.id, question)
+                })
 
                 // const matchingQuestionsMap = new Map<
                 //     string,
@@ -147,6 +152,7 @@ export function HostDashboardDataProvider(
                 dispatch({
                     type: HostDashboardActionType.FinishFetchQuestions,
                     payload: hostQuestions,
+                    payload2: qualifyingQuestionsMap,
                 })
             } catch (e) {
                 dispatch({
@@ -401,9 +407,9 @@ export function useHostDashboardData() {
         }
     }
 
-    const getShowstopperQuestionById = (id: number) => {
+    const getQuestionByOrderId = (order: number) => {
         //dispatch
-        //return showstopperQuestionMap[id]
+        return initialState.questionMapByOrder.get(order)
     }
 
     const getMatchingQuestionById = (id: number) => {
@@ -475,7 +481,7 @@ export function useHostDashboardData() {
     return {
         data,
         dispatch,
-        getShowstopperQuestionById,
+        getQuestionByOrderId,
         getMatchingQuestionById,
         putShowstopperResponse,
         putMatchingResponse,
