@@ -5,9 +5,16 @@ import {
     useHostDashboardData,
 } from '../../data/host-context'
 import QuestionPage from '../../components/ProfileEdit/QuestionPage'
-import { Switch, Route, useRouteMatch } from 'react-router'
+import {
+    Switch,
+    Route,
+    useRouteMatch,
+    useParams,
+    useHistory,
+} from 'react-router'
 import MatchingQuestionPage from '../../components/ProfileEdit/MatchingQuestionPage'
 import ShowstopperQuestionPage from '../../components/ProfileEdit/ShowstopperQuestionPage'
+import { render } from '@testing-library/react'
 
 const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault()
@@ -44,12 +51,54 @@ export const ControlPanel = (props: ControlPanelProps) => {
 }
 
 export const QuestionPageTemp = () => {
-    const submit = () => {}
+    let { questionType, orderId } = useParams()
+    const history = useHistory()
+    let { path } = useRouteMatch()
+
+    const { getQuestionByOrderId, data } = useHostDashboardData()
+
+    //question prop
+    let currentQuestion = getQuestionByOrderId(orderId)
+
+    //PUT request + route to next question
+    const submit = () => {
+        //submit response via api wrapper method
+        history.push(`${path}/${questionType}/${orderId++}`)
+    }
+
     const changeResponse = () => {}
+
+    const renderQuestionPage = (
+        registrationQuestionType: string
+    ): JSX.Element => {
+        switch (registrationQuestionType) {
+            case 'qualifying':
+                return (
+                    <ShowstopperQuestionPage
+                        showstopperQuestions={data.showstopperQuestions}
+                        question={currentQuestion}
+                    />
+                )
+            case 'matching':
+                return (
+                    <MatchingQuestionPage
+                        matchingQuestions={data.matchingQuestions}
+                        question={currentQuestion}
+                    />
+                )
+
+            case 'info':
+            //switch case for info type
+            default:
+                return <DefaultRegComp />
+        }
+    }
     return (
         <>
             <ProgressBarTemp />
-            <QuestionPanel onResponseChanged={changeResponse} />
+            {/* <QuestionPanel onResponseChanged={changeResponse} /> */}
+            {renderQuestionPage(questionType)}
+
             <ControlPanel onSubmit={submit} />
         </>
     )
@@ -61,7 +110,7 @@ export const HostQuestionsPage = () => {
     return (
         <Switch>
             <Route
-                path={`${path}/qualifying/:questionId`}
+                path={`${path}/:questionType/:orderId`}
                 component={QuestionPageTemp}
             />
             {/* <Route

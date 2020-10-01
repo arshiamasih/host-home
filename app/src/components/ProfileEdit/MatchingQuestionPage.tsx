@@ -16,8 +16,8 @@ import { useParams } from 'react-router'
 interface MatchingQuestionPageProps {
     // showstopperQuestions: Array<ShowstopperQuestionType>
     matchingQuestions: Array<MatchingQuestionType>
-    stepwise: boolean
-    onSubmit: React.EventHandler<React.FormEvent<HTMLFormElement>>
+    stepwise?: boolean
+    onSubmit?: React.EventHandler<React.FormEvent<HTMLFormElement>>
 }
 
 const StyledButton = styled(Button)`

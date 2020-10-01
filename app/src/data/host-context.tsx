@@ -403,10 +403,6 @@ export function useHostDashboardData() {
         return initialState.questionMapByOrder.get(order)
     }
 
-    const getMatchingQuestionById = (id: number) => {
-        //dispatch
-        //return matchingQuestionMap[id]
-    }
     console.log(`about to destructure context`)
     const [data, dispatch] = context as [
         HostDashboardData,
@@ -473,7 +469,6 @@ export function useHostDashboardData() {
         data,
         dispatch,
         getQuestionByOrderId,
-        getMatchingQuestionById,
         putShowstopperResponse,
         putMatchingResponse,
         putPersonalInfo,
