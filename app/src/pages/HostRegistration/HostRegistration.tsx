@@ -59,11 +59,13 @@ export const QuestionPageTemp = () => {
 
     //question prop
     let currentQuestion = getQuestionByOrderId(orderId)
+    let nextQuestionType = getQuestionByOrderId(orderId++)
+    let nextQuestionOrderId = +orderId++
 
     //PUT request + route to next question
     const submit = () => {
         //submit response via api wrapper method
-        history.push(`${path}/${questionType}/${orderId++}`)
+        history.push(`${path}/${nextQuestionType}/${nextQuestionOrderId}`)
     }
 
     const changeResponse = () => {}
