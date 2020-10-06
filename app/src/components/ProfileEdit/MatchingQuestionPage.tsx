@@ -1,20 +1,19 @@
 import * as React from 'react'
-import ShowstopperQuestion from './ShowstopperQuestion'
-import MatchingQuestion from './MatchingQuestion'
+
 import { ShowstopperQuestionType } from '../../models/ShowstopperQuestionType'
 import { MatchingQuestionType } from '../../models/MatchingQuestionType'
-import MUIModal from '../MUIModal/MUIModal'
 import { MuiThemeProvider } from '@material-ui/core/styles'
 import { theme } from '../Registration/theme'
 import { useHostDashboardData } from '../../data/host-context'
 import styled from 'styled-components'
 import { Box, Button, LinearProgress } from '@material-ui/core'
 import MessageModal from '../MUIModal/MessageModal/MessageModal'
-import ConfirmationModal from '../MUIModal/ConfirmationModal/ConfirmationModal'
+import MatchingQuestion from './MatchingQuestion'
 import { useParams } from 'react-router'
 
 interface MatchingQuestionPageProps {
     // showstopperQuestions: Array<ShowstopperQuestionType>
+    // question: MatchingQuestionType
     matchingQuestions: Array<MatchingQuestionType>
     stepwise?: boolean
     onSubmit?: React.EventHandler<React.FormEvent<HTMLFormElement>>
@@ -68,6 +67,8 @@ const IconContainer = (props: {
 
 export const MatchingQuestionPage = (props: MatchingQuestionPageProps) => {
     const { data, putMatchingResponse } = useHostDashboardData()
+    const { orderId } = useParams()
+
     // console.log('testing custom hook', data)
 
     // sort by order
@@ -144,6 +145,7 @@ export const MatchingQuestionPage = (props: MatchingQuestionPageProps) => {
         if (!groups[groupI][subgroupI]) groups[groupI][subgroupI] = []
         groups[groupI][subgroupI].push(state.questions[i])
     }
+
     const getStepperProgress = () => {
         // some math
         const groupDistance = 1 / (groups.length + 1)
@@ -181,14 +183,7 @@ export const MatchingQuestionPage = (props: MatchingQuestionPageProps) => {
     }
 
     const clickForward = () => {
-        //dummy set state modeled as the HostResponse type
-        //responseValues value should be result of setAnswer on state
-        // let testResponse = {
-        //     questionId: 1,
-        //     hostId: 1,
-        //     responseValues: [1],
-        // }
-        // await putMatchingResponse(state.groupIndex, testResponse)
+        //submit methods
 
         if (state.subgroupIndex < groups[state.groupIndex].length - 1) {
             setState({ ...state, subgroupIndex: state.subgroupIndex + 1 })

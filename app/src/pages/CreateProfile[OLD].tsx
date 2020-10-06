@@ -1,3 +1,5 @@
+/* THIS COMPONENT IS NOT IN USE */
+
 import * as React from 'react'
 import { useAuth0 } from '../react-auth0-spa'
 import { useHistory } from 'react-router'

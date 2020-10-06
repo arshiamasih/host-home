@@ -1,9 +1,8 @@
-import * as React from 'react'
-import QuestionField from '../components/ProfileEdit/Question'
+/* THIS COMPONENT IS NOT IN USE */
 
+import * as React from 'react'
 import styled from 'styled-components'
 import { Button, LinearProgress } from '@material-ui/core'
-import { QuestionType } from '../models/QuestionType'
 import { Fetcher } from '../data/ApiWrapper'
 import { HostQuestion, ResponseValue } from '../models'
 

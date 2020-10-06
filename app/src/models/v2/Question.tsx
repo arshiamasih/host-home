@@ -1,10 +1,12 @@
-export type QuestionType =
-    | 'Qualifying'
-    | 'Info'
-    | 'Matching'
-    | 'Bio'
-    | 'Personal'
-    | 'info'
+// export type QuestionType =
+//     | 'Qualifying'
+//     | 'Info'
+//     | 'Matching'
+//     | 'Bio'
+//     | 'Personal'
+//     | 'info'
+
+export type QuestionType = 'Qualifying' | 'info' | 'Matching'
 
 export interface GenericQuestion {
     _id: string
@@ -12,6 +14,7 @@ export interface GenericQuestion {
     group: QuestionType
     question: string
     order: string
+    type: string
 }
 
 export interface QualifyingQuestion extends GenericQuestion {
@@ -28,12 +31,10 @@ export interface ResponseOption {
 export interface MatchingQuestion extends GenericQuestion {
     subgroup: string
     options: Array<ResponseOption>
-    type: string
 }
 
 export interface InfoQuestion extends GenericQuestion {
     options: Array<ResponseOption>
-    type: string
 }
 
 export type Question = InfoQuestion | MatchingQuestion | QualifyingQuestion

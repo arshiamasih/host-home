@@ -11,7 +11,7 @@ import {
     CreateProfile,
     CreateHostProfile,
     CreateGuestProfile,
-} from './pages/CreateProfile'
+} from './pages/CreateProfile[OLD]'
 import { AllHosts } from './pages/Admin/AllHosts'
 import ProfileSelection from './pages/ProfileSelection/ProfileSelection'
 import FourOhFour from './pages/FourOhFour'
@@ -24,6 +24,7 @@ import { HostRegistration } from './pages/HostRegistration/HostRegistration'
 import ImageUploadComponent from './components/UploadImage/ImageUploadComponent'
 import HostFormGender from './components/HostFormDetail/HostFormGender'
 import HostFormLang from './components/HostFormDetail/HostFormLang'
+import { QuestionPageTemp } from './pages/HostRegistration/HostRegistration'
 import { HostDashboard, HostDashboardContainer } from './pages/HostDashboard'
 import {
     AdminDashboard,
@@ -57,6 +58,7 @@ export default function Routes() {
             <Route path="/guest/register" component={GuestRegistration} />
             <Route path="/host/register" component={HostRegistration} />
             <Route path="/host/dashboard" component={HostDashboardContainer} />
+
             <Route
                 path="/admin/dashboard"
                 component={AdminDashboardContainer}

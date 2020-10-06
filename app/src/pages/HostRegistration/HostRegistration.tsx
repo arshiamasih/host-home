@@ -4,7 +4,6 @@ import {
     HostDashboardDataProvider,
     useHostDashboardData,
 } from '../../data/host-context'
-import QuestionPage from '../../components/ProfileEdit/QuestionPage'
 import {
     Switch,
     Route,
@@ -43,9 +42,7 @@ export interface QuestionPanelProps {
 export const QuestionPanel = (props: QuestionPanelProps) => {
     return <></>
 }
-export interface ControlPanelProps {
-    onSubmit: () => void
-}
+export interface ControlPanelProps {}
 export const ControlPanel = (props: ControlPanelProps) => {
     return <></>
 }
@@ -55,17 +52,30 @@ export const QuestionPageTemp = () => {
     const history = useHistory()
     let { path } = useRouteMatch()
 
-    const { getQuestionByOrderId, data } = useHostDashboardData()
+    const {
+        getQuestionByOrderId,
+        data,
+        putMatchingResponse,
+    } = useHostDashboardData()
 
-    //question prop
+    // next question params
+    // should these from context --> return an object with variables as keys
     let currentQuestion = getQuestionByOrderId(orderId)
-    let nextQuestionType = getQuestionByOrderId(orderId++)
+    let nextQuestion = getQuestionByOrderId(orderId++)
+        ? getQuestionByOrderId(orderId++)
+        : null
+    let nextQuestionType = nextQuestion ? nextQuestion.type : null
     let nextQuestionOrderId = +orderId++
 
     //PUT request + route to next question
     const submit = () => {
         //submit response via api wrapper method
-        history.push(`${path}/${nextQuestionType}/${nextQuestionOrderId}`)
+
+        //switch case PUT method
+
+        nextQuestion
+            ? history.push(`${path}/${nextQuestionType}/${nextQuestionOrderId}`)
+            : history.push(`/host/dashboard`)
     }
 
     const changeResponse = () => {}
@@ -74,18 +84,20 @@ export const QuestionPageTemp = () => {
         registrationQuestionType: string
     ): JSX.Element => {
         switch (registrationQuestionType) {
-            case 'qualifying':
+            case 'Qualifying':
                 return (
                     <ShowstopperQuestionPage
                         showstopperQuestions={data.showstopperQuestions}
                         question={currentQuestion}
+                        onSubmit={submit}
                     />
                 )
-            case 'matching':
+            case 'Matching':
                 return (
                     <MatchingQuestionPage
                         matchingQuestions={data.matchingQuestions}
                         question={currentQuestion}
+                        onSubmit={submit}
                     />
                 )
 
@@ -101,7 +113,7 @@ export const QuestionPageTemp = () => {
             {/* <QuestionPanel onResponseChanged={changeResponse} /> */}
             {renderQuestionPage(questionType)}
 
-            <ControlPanel onSubmit={submit} />
+            <ControlPanel />
         </>
     )
 }
