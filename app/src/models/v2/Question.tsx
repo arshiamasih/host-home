@@ -12,6 +12,7 @@ export interface GenericQuestion {
     _id: string
     id: string
     group: QuestionType
+    subgroup?: string
     question: string
     order: string
     type: string

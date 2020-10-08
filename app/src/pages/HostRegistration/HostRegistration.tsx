@@ -54,6 +54,8 @@ export const QuestionPageTemp = () => {
 
     const {
         getQuestionByOrderId,
+        getQualifyingQuestionByOrderId,
+        getMatchingQuestionByOrderId,
         data,
         putMatchingResponse,
     } = useHostDashboardData()
@@ -64,15 +66,11 @@ export const QuestionPageTemp = () => {
     let nextQuestion = getQuestionByOrderId(orderId++)
         ? getQuestionByOrderId(orderId++)
         : null
+
     let nextQuestionType = nextQuestion ? nextQuestion.type : null
     let nextQuestionOrderId = +orderId++
 
-    //PUT request + route to next question
-    const submit = () => {
-        //submit response via api wrapper method
-
-        //switch case PUT method
-
+    const routeNextQuestion = () => {
         nextQuestion
             ? history.push(`${path}/${nextQuestionType}/${nextQuestionOrderId}`)
             : history.push(`/host/dashboard`)
@@ -89,7 +87,7 @@ export const QuestionPageTemp = () => {
                     <ShowstopperQuestionPage
                         showstopperQuestions={data.showstopperQuestions}
                         question={currentQuestion}
-                        onSubmit={submit}
+                        routeNextQuestion={routeNextQuestion}
                     />
                 )
             case 'Matching':
@@ -97,7 +95,7 @@ export const QuestionPageTemp = () => {
                     <MatchingQuestionPage
                         matchingQuestions={data.matchingQuestions}
                         question={currentQuestion}
-                        onSubmit={submit}
+                        routeNextQuestion={routeNextQuestion}
                     />
                 )
 

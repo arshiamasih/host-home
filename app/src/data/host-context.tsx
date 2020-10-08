@@ -14,7 +14,8 @@ const HostDashboardContext = React.createContext({})
 const apiClient = new ApiWrapper()
 
 interface HostDashboardData {
-    questionMapByOrder: Map<number, Question>
+    qualifyingQuestionMapByOrder: Map<number, Array<number>>
+    matchingQuestionMapByOrder: Map<number, Array<number>>
     showstopperQuestions: Array<QualifyingQuestion>
     matchingQuestions: Array<MatchingQuestion>
     hostResponse: HostResponse | null
@@ -48,7 +49,8 @@ interface HostDashboardAction {
 }
 
 const initialState: HostDashboardData = {
-    questionMapByOrder: new Map<number, Question>(),
+    qualifyingQuestionMapByOrder: new Map<number, Array<number>>(),
+    matchingQuestionMapByOrder: new Map<number, Array<number>>(),
     showstopperQuestions: [],
     matchingQuestions: [],
     hostResponse: null,
@@ -83,7 +85,10 @@ function hostDashboardReducer(
                     QualifyingQuestion
                 >,
                 matchingQuestions: action.payload[1] as Array<MatchingQuestion>,
-                questionMapByOrder: action.payload2 as Map<number, Question>,
+                qualifyingQuestionMapByOrder: action.payload2
+                    .qualifyingQuestionMap as Map<number, Array<number>>,
+                matchingQuestionMapByOrder: action.payload2
+                    .matchingQuestionMap as Map<number, Array<number>>,
             }
         }
         case HostDashboardActionType.BeginPostResponse: {
@@ -118,40 +123,71 @@ export function HostDashboardDataProvider(
         initialState
     )
 
-    const loadData = async () => {
-        console.log('loadData: fetching...')
-        try {
-            dispatch({
-                type: HostDashboardActionType.BeginFetchQuestions,
-                payload: 'Retrieving host questions...',
-            })
-
-            const hostQuestions = await Promise.all([
-                apiClient.getHostShowstopperQuestions(),
-                apiClient.getHostMatchingQuestions(),
-            ])
-
-            //set on state
-            const qualifyingQuestionsMap = new Map<string, QualifyingQuestion>()
-            hostQuestions[0].map((question: QualifyingQuestion) => {
-                return qualifyingQuestionsMap.set(question.id, question)
-            })
-
-            dispatch({
-                type: HostDashboardActionType.FinishFetchQuestions,
-                payload: hostQuestions,
-                payload2: qualifyingQuestionsMap,
-            })
-        } catch (e) {
-            dispatch({
-                type: HostDashboardActionType.Error,
-                payload: `System error: ${e}`,
-            })
-        }
-    }
-
     React.useEffect(() => {
-        loadData()
+        ;(async function () {
+            console.log('loadData: fetching...')
+            try {
+                dispatch({
+                    type: HostDashboardActionType.BeginFetchQuestions,
+                    payload: 'Retrieving host questions...',
+                })
+
+                const hostQuestions = await Promise.all([
+                    apiClient.getHostShowstopperQuestions(),
+                    apiClient.getHostMatchingQuestions(),
+                ])
+
+                //set on state
+                const qualifyingQuestions = hostQuestions[0]
+                const matchingQuestions = hostQuestions[1]
+
+                // re-uses logic in Question Pages to store corresponding indexes on component state
+                function setQuestionsMap(questions: Array<QualifyingQuestion>) {
+                    const groupsMap = new Map()
+                    let groupI = 0
+                    let subgroupI = 0
+
+                    for (let i = 0; i < questions.length; i++) {
+                        if (/[A-Za-z]/.test(questions[i].order)) continue
+
+                        if (questions[i - 1]) {
+                            if (
+                                questions[i].group === undefined ||
+                                questions[i].group !== questions[i - 1].group
+                            ) {
+                                groupI++
+                                subgroupI = 0
+                            } else if (
+                                questions[i].subgroup === undefined ||
+                                questions[i].subgroup !==
+                                    questions[i - 1].subgroup
+                            ) {
+                                subgroupI++
+                            }
+                        }
+
+                        groupsMap.set(questions[i].order, [groupI, subgroupI])
+                        return groupsMap
+                    }
+                }
+
+                const qualifyingQuestionsMap = setQuestionsMap(
+                    qualifyingQuestions
+                )
+                const matchingQuestionsMap = setQuestionsMap(matchingQuestions)
+
+                dispatch({
+                    type: HostDashboardActionType.FinishFetchQuestions,
+                    payload: hostQuestions,
+                    payload2: { qualifyingQuestionsMap, matchingQuestionsMap },
+                })
+            } catch (e) {
+                dispatch({
+                    type: HostDashboardActionType.Error,
+                    payload: `System error: ${e}`,
+                })
+            }
+        })()
     }, [])
 
     const value = React.useMemo(() => [state, dispatch], [state])
@@ -398,11 +434,21 @@ export function useHostDashboardData() {
         }
     }
 
+    //returns indexes as pair and Top Level Question to determine question type
+    //refactor to make one Map
     const getQuestionByOrderId = (order: number) => {
-        //dispatch
-        return initialState.questionMapByOrder.get(order)
+        return initialState.qualifyingQuestionMapByOrder.get(order)
     }
 
+    const getQualifyingQuestionByOrderId = (order: number) => {
+        //dispatch
+        return initialState.qualifyingQuestionMapByOrder.get(order)
+    }
+
+    const getMatchingQuestionByOrderId = (order: number) => {
+        //dispatch
+        return initialState.matchingQuestionMapByOrder.get(order)
+    }
     console.log(`about to destructure context`)
     const [data, dispatch] = context as [
         HostDashboardData,
@@ -469,6 +515,8 @@ export function useHostDashboardData() {
         data,
         dispatch,
         getQuestionByOrderId,
+        getQualifyingQuestionByOrderId,
+        getMatchingQuestionByOrderId,
         putShowstopperResponse,
         putMatchingResponse,
         putPersonalInfo,
